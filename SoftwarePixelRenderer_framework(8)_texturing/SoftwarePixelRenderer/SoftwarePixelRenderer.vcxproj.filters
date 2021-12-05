@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{1dd5d59f-d374-4cc9-a928-549d7a767fd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{62994ddd-4b51-44cc-ae51-1bb70e395fee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model\Mesh">
+      <UniqueIdentifier>{911b0a4c-4f0c-442e-b2a2-bc0e089a32ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{6639e9a0-9d0b-451b-bce8-796890209ebe}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftwarePixelRenderer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CD2dSystem.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="define.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CWicBitmap.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CMesh.h">
+      <Filter>Model\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CCamera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CRay.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CFace.h">
+      <Filter>Model\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CCube.h">
+      <Filter>Model\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CModelObject.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="CModelImportor.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="CTpsCamera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CFpsCamera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="FrustumClass.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CMaterial.h">
+      <Filter>Model\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="CVertexColorShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="CBoundbox.h">
+      <Filter>Model\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameObject.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="CTextureShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="CBresenhamLine.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SoftwarePixelRenderer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CD2dSystem.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CWicBitmap.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CMesh.cpp">
+      <Filter>Model\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CCamera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="util.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CRay.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CFace.cpp">
+      <Filter>Model\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CCube.cpp">
+      <Filter>Model\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CModelObject.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="CModelImportor.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="CFpsCamera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CTpsCamera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="FrustumClass.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CMaterial.cpp">
+      <Filter>Model\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="CVertexColorShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="CBoundbox.cpp">
+      <Filter>Model\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CGameObject.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="CTextureShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="CBresenhamLine.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SoftwarePixelRenderer.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="SoftwarePixelRenderer.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
