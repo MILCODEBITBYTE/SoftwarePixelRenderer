@@ -27,9 +27,10 @@ Tutorial 목차는 다음과 같습니다.
     5. frustum culling                : Rendering pipeline 상의 object culling, backface culling  구현
     6. clipping                       : Rendering pipeline 상의 face clipping 구현
     7. vertex color                   : 정점 색상을 이용한 fill triangle 구현
-    8. texturing                      : Texture mapping 구현
-    9. texturing solved distortion    : Texture mapping 외곡
-    10. lighting                      : 빠른 조명 구현
-    11. lighting smooth               : 정확한 조명 구현
-    12. lighting stencil and shadow   : Stencil 버퍼와 그림자 매핑
+    8. z buffer                       : Z buffer test 환경 구현
+    9. texturing                      : Texture mapping 구현
+    10. texturing solved distortion   : Texture mapping 외곡
+    11. lighting                      : 빠른 조명 구현
+    12. lighting smooth               : 정확한 조명 구현
+    13. lighting stencil and shadow   : Stencil 버퍼와 그림자 매핑
     
