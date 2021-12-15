@@ -15,7 +15,7 @@ public:
 	void Initialize(IWICBitmap* pScreenBuffer);
 	void SetWireframe(const bool bShow);
 	bool IsWireframe() const;
-	virtual void Render(CFace* pFace, CMaterial* pMateril, const RENDER_STATE state = RENDER_STATE::FLAT);
+	virtual void Render(CFace* pFace, CMaterial* pMateril,const RENDER_STATE state = RENDER_STATE::FLAT);
 
 	void SetModelMatrix(const XMFLOAT4X4& matModel);
 	void SetModelMatrix(const XMMATRIX& matModel);
@@ -28,12 +28,20 @@ public:
 	void SetViewportMatrix(const XMFLOAT4X4& matViewport);
 	void SetViewportMatrix(const XMMATRIX& matViewport);
 
+	bool ZTest(float* pBuffer, const UINT uiOffset, const float fZ);
 protected:
-	virtual void DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const int iScreenWidth, const int iScreenHeight, const RENDER_STATE state);
-	virtual void DrawQuad(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const int iScreenWidth, const int iScreenHeight, const RENDER_STATE state);
+	virtual void DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const RENDER_STATE state);
+	virtual void DrawQuad(VERTEX* pVertices, CMaterial* pMaterial,  const wstring strMaterialName, const RENDER_STATE state);
 
-	void DrawFlatLine(BYTE* pBuffer, const UINT uiStride, const XMFLOAT4 v4Col, const VERTEX* pStart, const VERTEX* pEnd, const int iScreenWidth, const int iScreenHeight);
-	void DrawSmoothLine(BYTE* pBuffer, const UINT uiStride,  const VERTEX* pStart, const VERTEX* pEnd, const int iScreenWidth, const int iScreenHeight);
+
+	virtual void FillTrilinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pVertices[3], CWicBitmap* pTex);
+	virtual void FillLinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pStart, const VERTEX* pEnd, CWicBitmap* pTex);
+
+	virtual void FillTrilinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pVertices[3]);
+	virtual void FillLinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pStart, const VERTEX* pEnd);
+
+	virtual void DrawTrilinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pVertices[3]);
+	virtual void DrawLinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pStart, const VERTEX* pEnd);
 
 protected:
 

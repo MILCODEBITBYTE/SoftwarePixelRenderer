@@ -11,15 +11,20 @@ public:
 	~CVertexColorShader();
 
 
-	void Render(CFace* pFace, CMaterial* pMaterial, const RENDER_STATE state=RENDER_STATE::FLAT) override;
-
+	void Render(CFace* pFace, CMaterial* pMaterial,const RENDER_STATE state=RENDER_STATE::FLAT) override;
 protected:
-	void DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const int iScreenWidth, const int iScreenHeight, const RENDER_STATE state) override;
-	void DrawQuad(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const int iScreenWidth, const int iScreenHeight, const RENDER_STATE state) override;
+	void DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const RENDER_STATE state) override;
+	void DrawQuad(VERTEX* pVertices, CMaterial* pMaterial,  const wstring strMaterialName,  const RENDER_STATE state) override;
 private:
-	void DrawTriTest(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight);
-	void FillTriTest(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight);
-	void DrawTriSmooth(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight);
-	void FillTriSmooth(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight);
+
+	void FillTrilinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pVertices[3]) override;
+	void FillLinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pStart, const VERTEX* pEnd) override;
+
+	void DrawTrilinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pVertices[3]) override;
+	void DrawLinearInterpolation(BYTE* pBack, const UINT uiStride, const VERTEX* pStart, const VERTEX* pEnd) override;
+
+
+
+private:
 };
 

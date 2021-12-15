@@ -11,66 +11,53 @@ CVertexColorShader::~CVertexColorShader()
 {
 }
 
-void CVertexColorShader::Render(CFace* pFace, CMaterial* pMaterial, const RENDER_STATE state)
+void CVertexColorShader::Render(CFace* pFace, CMaterial* pMaterial,  const RENDER_STATE state)
 {
 	if (nullptr == m_pScreenBuffer) return;
-
-	int w = int(m_matViewport._11 * 2.f);
-	int h = int(m_matViewport._22 * -2.f);
 
 	XMMATRIX matModel = XMLoadFloat4x4(&m_matModel);
 	XMMATRIX matWorld = XMLoadFloat4x4(&m_matWorld);
 	XMMATRIX matView = XMLoadFloat4x4(&m_matView);
 	XMMATRIX matProj = XMLoadFloat4x4(&m_matProj);
 	XMMATRIX matViewport = XMLoadFloat4x4(&m_matViewport);
-	XMMATRIX matMWVPV;
+	XMMATRIX matMW;
+	XMMATRIX matVPV;
 
-	matMWVPV = XMMatrixMultiply(matModel, matWorld);
-	matMWVPV = XMMatrixMultiply(matMWVPV, matView);
-	matMWVPV = XMMatrixMultiply(matMWVPV, matProj);
-	matMWVPV = XMMatrixMultiply(matMWVPV, matViewport);
+	matMW = XMMatrixMultiply(matModel, matWorld);
+	matVPV = XMMatrixMultiply(matView, matProj);
+	matVPV = XMMatrixMultiply(matVPV, matViewport);
 
 	VERTEX* pVertices = pFace->GetVertices();
 	size_t tVtxCnt = pFace->GetVertexCount();
 	XMVECTOR vCalc;
 
-	for (size_t i = 0; i < tVtxCnt; ++i)
+
+
+	for(size_t i = 0; i <tVtxCnt; ++i)
 	{
 		vCalc = XMLoadFloat3(&pVertices[i].v3Vtx);
-		vCalc = XMVector3TransformCoord(vCalc, matMWVPV);
+		vCalc = XMVector3TransformCoord(vCalc, matMW);
+		vCalc = XMVector3TransformCoord(vCalc, matVPV);
 		XMStoreFloat3(&pVertices[i].v3Vtx, vCalc);
 	}
 
 	if (tVtxCnt == 3)
-		DrawTriangle(pVertices, nullptr, pFace->GetMaterialName(), w, h, state);
+		DrawTriangle(pVertices, nullptr,  pFace->GetMaterialName(),state);
 	else
-		DrawQuad(pVertices,nullptr, pFace->GetMaterialName(), w, h, state);
+		DrawQuad(pVertices,nullptr, pFace->GetMaterialName(), state);
 }
 
 
-void CVertexColorShader::DrawTriTest(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight)
+void CVertexColorShader::DrawTrilinearInterpolation(BYTE* pBack, const UINT stride, const VERTEX* pVertices[3])
 {
-	XMFLOAT4 v4Col;
-	v4Col.x = (pVertices[0].v4Color.x + pVertices[1].v4Color.x + pVertices[2].v4Color.x) / 3.f;
-	v4Col.y = (pVertices[0].v4Color.y + pVertices[1].v4Color.y + pVertices[2].v4Color.y) / 3.f;
-	v4Col.z = (pVertices[0].v4Color.z + pVertices[1].v4Color.z + pVertices[2].v4Color.z) / 3.f;
-	v4Col.w = (pVertices[0].v4Color.w + pVertices[1].v4Color.w + pVertices[2].v4Color.w) / 3.f;
+	int w = int(m_matViewport._11 * 2.f);
+	int h = int(m_matViewport._22 * -2.f);
 
-	for (int i = 0; i < 3; ++i)
-	{
-		//bresenham algorithm
-		DrawFlatLine(pBack, stride, v4Col, pVertices, pVertices + 1 , iScreenWidth, iScreenHeight);
-		DrawFlatLine(pBack, stride, v4Col, pVertices+1, pVertices + 2, iScreenWidth, iScreenHeight);
-		DrawFlatLine(pBack, stride, v4Col, pVertices+2, pVertices,  iScreenWidth, iScreenHeight);
-	}
-}
 
-void CVertexColorShader::FillTriTest(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight)
-{
 	const VERTEX* SortedCross[3];
-	SortedCross[0] = &pVertices[0];
-	SortedCross[1] = &pVertices[1];
-	SortedCross[2] = &pVertices[2];
+	SortedCross[0] = pVertices[0];
+	SortedCross[1] = pVertices[1];
+	SortedCross[2] = pVertices[2];
 
 	//cross sort
 	const VERTEX* ptTemp;
@@ -97,25 +84,30 @@ void CVertexColorShader::FillTriTest(BYTE* pBack, const UINT stride, const VERTE
 	lineB.Initialize(ptA, ptC);
 
 	XMFLOAT4 v4Col;
-	v4Col.x = (pVertices[0].v4Color.x + pVertices[1].v4Color.x + pVertices[2].v4Color.x) / 3.f;
-	v4Col.y = (pVertices[0].v4Color.y + pVertices[1].v4Color.y + pVertices[2].v4Color.y) / 3.f;
-	v4Col.z = (pVertices[0].v4Color.z + pVertices[1].v4Color.z + pVertices[2].v4Color.z) / 3.f;
-	v4Col.w = (pVertices[0].v4Color.w + pVertices[1].v4Color.w + pVertices[2].v4Color.w) / 3.f;
+	v4Col.x = (SortedCross[0]->v4Color.x + SortedCross[1]->v4Color.x + SortedCross[2]->v4Color.x) / 3.f;
+	v4Col.y = (SortedCross[0]->v4Color.y + SortedCross[1]->v4Color.y + SortedCross[2]->v4Color.y) / 3.f;
+	v4Col.z = (SortedCross[0]->v4Color.z + SortedCross[1]->v4Color.z + SortedCross[2]->v4Color.z) / 3.f;
+	v4Col.w = (SortedCross[0]->v4Color.w + SortedCross[1]->v4Color.w + SortedCross[2]->v4Color.w) / 3.f;
 
 	BYTE R, G, B, A;
+
+
 	R = (BYTE)(v4Col.x * 255.f);
 	G = (BYTE)(v4Col.y * 255.f);
 	B = (BYTE)(v4Col.z * 255.f);
 	A = (BYTE)(v4Col.w * 255.f);
+
 
 	typedef struct tagLineDepth
 	{
 		struct LINE
 		{
 			long y;
+			float z;
 			LINE()
 			{
 				y = 0;
+				z = -1;
 			}
 		};
 
@@ -127,10 +119,12 @@ void CVertexColorShader::FillTriTest(BYTE* pBack, const UINT stride, const VERTE
 	size_t size = vecDepth.size();
 
 
-	function<void(CBresenhamLine&, const WORD)> fcLineNextStep = [&](CBresenhamLine& line, const WORD num)
+	function<void(CBresenhamLine&, const WORD, const float , const float)> fcLineNextStep = [&](CBresenhamLine& line, const WORD num,  const float zStart, const float zEnd)
 	{
 		long X = 0;
 		long Y = 0;
+		float fZ=0;
+		float fRate = 0;
 		do
 		{
 
@@ -139,6 +133,12 @@ void CVertexColorShader::FillTriTest(BYTE* pBack, const UINT stride, const VERTE
 
 			LINE_DEPTH::LINE& dir = vecDepth[X - ptA.x].line[num];
 
+			fRate = line.GetCurrentRate();
+			if (line.isLeft())
+				fRate = 1.f - fRate;
+
+			dir.z = zStart * (1.f - fRate) + zEnd * fRate;
+
 			dir.y = Y;
 
 		} while (line.MoveNext());
@@ -146,9 +146,13 @@ void CVertexColorShader::FillTriTest(BYTE* pBack, const UINT stride, const VERTE
 
 	};
 
-	fcLineNextStep(lineB, 2);
-	fcLineNextStep(lineA, 0);
-	fcLineNextStep(lineAB, 1);
+	fcLineNextStep(lineB, 2, SortedCross[0]->v3Vtx.z, SortedCross[2]->v3Vtx.z);
+	fcLineNextStep(lineA, 0,  SortedCross[0]->v3Vtx.z, SortedCross[1]->v3Vtx.z);
+	fcLineNextStep(lineAB, 1, SortedCross[1]->v3Vtx.z, SortedCross[2]->v3Vtx.z);
+
+	float fRate;
+	float fZStart, fZEnd;
+	float fCurrZ = 1;
 
 	long x;
 	long lStartY, lEndY, lDirY;
@@ -162,20 +166,23 @@ void CVertexColorShader::FillTriTest(BYTE* pBack, const UINT stride, const VERTE
 	{
 		x = long(ptA.x + step);
 
-		if (x < 0 || x >= iScreenWidth) continue;
+		if (x < 0 || x >= w) continue;
 
 		//part A
 		if (x < ptB.x)
 		{
 			lStartY = vecDepth[step].line[0].y;
+			fZStart = vecDepth[step].line[0].z;
 		}
 		//part AB
 		else
 		{
 			lStartY = vecDepth[step].line[1].y;
+			fZStart = vecDepth[step].line[1].z;
 		}
 		//part B
 		lEndY = vecDepth[step].line[2].y;
+		fZEnd = vecDepth[step].line[2].z;
 
 		if (lEndY < lStartY) lDirY = -1;
 		else
@@ -187,37 +194,123 @@ void CVertexColorShader::FillTriTest(BYTE* pBack, const UINT stride, const VERTE
 		len = abs(lStartY - lEndY);
 		for (long y = lStartY; y != lEndY; y += lDirY)
 		{
-			if (y < 0 || y >= iScreenHeight) continue;
+			if (y < 0 || y >= h) continue;
+
+			if (len == 0)
+				fRate = 0;
+			else
+				fRate = lCnt / (float)len;
+
+			lCnt++;
 
 			lBackIndex = y * stride + x * 4;
 
 			pBack[lBackIndex + 0] = B;
 			pBack[lBackIndex + 1] = G;
 			pBack[lBackIndex + 2] = R;
-			pBack[lBackIndex + 3] = A;
+			pBack[lBackIndex + 3] = 255;
 		}
 	}
 
 }
 
 
-
-void CVertexColorShader::DrawTriSmooth(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight)
+void CVertexColorShader::DrawLinearInterpolation(BYTE* pBuffer, const UINT uiStride, const VERTEX* pStart, const VERTEX* pEnd)
 {
-	for (int i = 0; i < 3; ++i)
+	int w = int(m_matViewport._11 * 2.f);
+	int h = int(m_matViewport._22 * -2.f);
+
+	CPoint ptStart, ptEnd;
+
+	ptStart = CPoint((int)roundf(pStart->v3Vtx.x), (int)roundf(pStart->v3Vtx.y));
+	ptEnd = CPoint((int)roundf(pEnd->v3Vtx.x), (int)roundf(pEnd->v3Vtx.y));
+
+	if (ptStart.x >= w)
+		ptStart.x = w - 1;
+	else if (ptStart.x < 0)
+		ptStart.x = 0;
+
+	if (ptStart.y >= h)
+		ptStart.y = h - 1;
+	else if (ptStart.y < 0)
+		ptStart.y = 0;
+
+	if (ptEnd.x < 0)
+		ptEnd.x = 0;
+	else if (ptEnd.x >= w)
+		ptEnd.x = w - 1;
+
+	if (ptEnd.y < 0)
+		ptEnd.y = 0;
+	else if (ptEnd.y >= h)
+		ptEnd.y = h - 1;
+
+	float fLen = 0;
+	float fZ1 = 1, fZ2 = 1;
+	float fZStart = 1, fZEnd = 1;
+	float fCurrZ = 1;
+
+	fZStart = pStart->v3Vtx.z;
+	fZEnd = pEnd->v3Vtx.z;
+
+	XMFLOAT4 v4Col;
+	v4Col.x = (pStart->v4Color.x + pEnd->v4Color.x) / 2.f;
+	v4Col.y = (pStart->v4Color.y + pEnd->v4Color.y) / 2.f;
+	v4Col.z = (pStart->v4Color.z + pEnd->v4Color.z) / 2.f;
+	v4Col.w = (pStart->v4Color.w + pEnd->v4Color.w) / 2.f;
+
+
+	BYTE R, G, B;
+	R = BYTE(255 * v4Col.x);
+	G = BYTE(255 * v4Col.y);
+	B = BYTE(255 * v4Col.z);
+
+	CBresenhamLine line;
+
+	line.Initialize(ptStart, ptEnd);
+
+	long lBackIndex;
+	float fRate;
+	long x, y;
+
+	do
 	{
-		DrawSmoothLine(pBack, stride, pVertices, pVertices + 1,  iScreenWidth, iScreenHeight);
-		DrawSmoothLine(pBack, stride, pVertices + 1, pVertices + 2, iScreenWidth, iScreenHeight);
-		DrawSmoothLine(pBack, stride, pVertices + 2, pVertices,  iScreenWidth, iScreenHeight);
-	}
+		x = line.GetCurrentX();
+		y = line.GetCurrentY();
+
+		fRate = line.GetCurrentRate();
+
+		if (line.isLeft())
+			fRate = 1.f - fRate;
+
+		lBackIndex = y * uiStride + x * 4;
+
+		pBuffer[lBackIndex + 0] = B;
+		pBuffer[lBackIndex + 1] = G;
+		pBuffer[lBackIndex + 2] = R;
+		pBuffer[lBackIndex + 3] = 255;
+
+
+	} while (line.MoveNext());
+
 }
 
-void CVertexColorShader::FillTriSmooth(BYTE* pBack, const UINT stride, const VERTEX* pVertices, const int iScreenWidth, const int iScreenHeight)
+
+
+
+
+
+void CVertexColorShader::FillTrilinearInterpolation(BYTE* pBack, const UINT stride, const VERTEX* pVertices[3])
 {
+	int w = int(m_matViewport._11 * 2.f);
+	int h = int(m_matViewport._22 * -2.f);
+
+	BYTE R, G, B, A=255;
+
 	const VERTEX* SortedCross[3];
-	SortedCross[0] = &pVertices[0];
-	SortedCross[1] = &pVertices[1];
-	SortedCross[2] = &pVertices[2];
+	SortedCross[0] = pVertices[0];
+	SortedCross[1] = pVertices[1];
+	SortedCross[2] = pVertices[2];
 
 	//cross sort
 	const VERTEX* ptTemp;
@@ -251,10 +344,12 @@ void CVertexColorShader::FillTriSmooth(BYTE* pBack, const UINT stride, const VER
 		struct LINE
 		{
 			long y;
+			float z;
 			XMFLOAT4 col;
 			LINE()
 			{
 				y = 0;
+				z = -1;
 			}
 		};
 
@@ -267,11 +362,12 @@ void CVertexColorShader::FillTriSmooth(BYTE* pBack, const UINT stride, const VER
 
 	float fRate;
 
-	function<void(CBresenhamLine&, const WORD, const XMFLOAT4, const XMFLOAT4)> fcLineNextStep = [&](CBresenhamLine& line, const WORD num, const XMFLOAT4 colStart, const XMFLOAT4 colEnd)
+	function<void(CBresenhamLine&, const WORD, const XMFLOAT4, const XMFLOAT4, const float, const float)> fcLineNextStep = [&](CBresenhamLine& line, const WORD num, const XMFLOAT4 colStart, const XMFLOAT4 colEnd, const float zStart, const float zEnd)
 	{
 		long X = 0;
 		long Y = 0;
 
+		float fZ = 0;
 		do
 		{
 
@@ -284,6 +380,8 @@ void CVertexColorShader::FillTriSmooth(BYTE* pBack, const UINT stride, const VER
 
 
 			LINE_DEPTH::LINE& dir = vecDepth[X - ptA.x].line[num];
+
+			dir.z = zStart * (1.f - fRate) + zEnd * fRate;
 
 			dir.col.x = colStart.x * (1.f - fRate) + colEnd.x * fRate;
 			dir.col.y = colStart.y * (1.f - fRate) + colEnd.y * fRate;
@@ -298,38 +396,42 @@ void CVertexColorShader::FillTriSmooth(BYTE* pBack, const UINT stride, const VER
 	};
 
 
-	fcLineNextStep(lineB, 2, SortedCross[0]->v4Color, SortedCross[2]->v4Color);
-	fcLineNextStep(lineA, 0, SortedCross[0]->v4Color, SortedCross[1]->v4Color);
-	fcLineNextStep(lineAB, 1, SortedCross[1]->v4Color, SortedCross[2]->v4Color);
+	fcLineNextStep(lineB, 2, SortedCross[0]->v4Color, SortedCross[2]->v4Color, SortedCross[0]->v3Vtx.z, SortedCross[2]->v3Vtx.z);
+	fcLineNextStep(lineA, 0, SortedCross[0]->v4Color, SortedCross[1]->v4Color, SortedCross[0]->v3Vtx.z, SortedCross[1]->v3Vtx.z);
+	fcLineNextStep(lineAB,1, SortedCross[1]->v4Color, SortedCross[2]->v4Color, SortedCross[1]->v3Vtx.z, SortedCross[2]->v3Vtx.z);
 
 	long x;
 	long lCnt = 0;
 	long len = 0;
 	long lBackIndex;
 	long lStartY, lEndY, lDirY;
+	float fZStart, fZEnd;
 	XMFLOAT4 colStart, colEnd;
 
 	for (size_t step = 0; step < size; ++step)
 	{
 		x = long(ptA.x + step);
 
-		if (x < 0 || x >= iScreenWidth) continue;
+		if (x < 0 || x >= w) continue;
 
 		//part A
 		if (x < ptB.x)
 		{
 			lStartY = vecDepth[step].line[0].y;
+			fZStart = vecDepth[step].line[0].z;
 			colStart = vecDepth[step].line[0].col;
 		}
 		//part AB
 		else
 		{
 			lStartY = vecDepth[step].line[1].y;
+			fZStart = vecDepth[step].line[1].z;
 			colStart = vecDepth[step].line[1].col;
 		}
 
 		//part B
 		lEndY = vecDepth[step].line[2].y;
+		fZEnd = vecDepth[step].line[2].z;
 		colEnd = vecDepth[step].line[2].col;
 
 		if (lEndY < lStartY) lDirY = -1;
@@ -343,8 +445,8 @@ void CVertexColorShader::FillTriSmooth(BYTE* pBack, const UINT stride, const VER
 
 		for (long y = lStartY; y != lEndY; y += lDirY)
 		{
-
-			if (y < 0 || y >= iScreenHeight) continue;
+			
+			if (y < 0 || y >= h) continue;
 
 			if (len == 0)
 				fRate = 0;
@@ -358,17 +460,115 @@ void CVertexColorShader::FillTriSmooth(BYTE* pBack, const UINT stride, const VER
 			v4Col.z = colStart.z * (1.f - fRate) + colEnd.z * fRate;
 			v4Col.w = colStart.w * (1.f - fRate) + colEnd.w * fRate;
 
+			R = BYTE(v4Col.x * 255.f);
+			G = BYTE(v4Col.y * 255.f);
+			B = BYTE(v4Col.z * 255.f);
+
+
+
 			lBackIndex = y * stride + x * 4;
 
-			pBack[lBackIndex + 0] = BYTE(v4Col.z * 255.f);
-			pBack[lBackIndex + 1] = BYTE(v4Col.y * 255.f);
-			pBack[lBackIndex + 2] = BYTE(v4Col.x * 255.f);
-			pBack[lBackIndex + 3] = BYTE(v4Col.w * 255.f);
+			pBack[lBackIndex + 0] = B;
+			pBack[lBackIndex + 1] = G;
+			pBack[lBackIndex + 2] = R;
+			pBack[lBackIndex + 3] = 255;// A;
 		}
 	}
+
 }
 
-void CVertexColorShader::DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const int iScreenWidth, const int iScreenHeight, const RENDER_STATE state)
+
+void CVertexColorShader::FillLinearInterpolation(BYTE* pBuffer, const UINT uiStride, const VERTEX* pStart, const VERTEX* pEnd)
+{
+	int w = int(m_matViewport._11 * 2.f);
+	int h = int(m_matViewport._22 * -2.f);
+
+	CPoint ptStart, ptEnd, ptDir;
+
+	ptStart = CPoint((int)roundf(pStart->v3Vtx.x), (int)roundf(pStart->v3Vtx.y));
+	ptEnd = CPoint((int)roundf(pEnd->v3Vtx.x), (int)roundf(pEnd->v3Vtx.y));
+
+	if (ptStart.x >= w)
+		ptStart.x = w - 1;
+	else if (ptStart.x < 0)
+		ptStart.x = 0;
+
+	if (ptStart.y >= h)
+		ptStart.y = h - 1;
+	else if (ptStart.y < 0)
+		ptStart.y = 0;
+
+	if (ptEnd.x < 0)
+		ptEnd.x = 0;
+	else if (ptEnd.x >= w)
+		ptEnd.x = w - 1;
+
+	if (ptEnd.y < 0)
+		ptEnd.y = 0;
+	else if (ptEnd.y >= h)
+		ptEnd.y = h - 1;
+
+	ptDir = ptEnd - ptStart;
+
+
+
+	BYTE sR, sG, sB, sA, eR, eG, eB, eA, fR, fG, fB, fA;
+
+	sR = BYTE(pStart->v4Color.x * 255.f);
+	sG = BYTE(pStart->v4Color.y * 255.f);
+	sB = BYTE(pStart->v4Color.z * 255.f);
+	sA = BYTE(pStart->v4Color.w * 255.f);
+
+	eR = BYTE(pEnd->v4Color.x * 255.f);
+	eG = BYTE(pEnd->v4Color.y * 255.f);
+	eB = BYTE(pEnd->v4Color.z * 255.f);
+	eA = BYTE(pEnd->v4Color.w * 255.f);
+
+
+	CBresenhamLine line;
+	line.Initialize(ptStart, ptEnd);
+
+	long x, y;
+	float fRate;
+	float fZ1 = 1, fZ2 = 1;
+	float fZStart = 1, fZEnd = 1;
+	float fCurrZ = 1;
+
+	fZStart = pStart->v3Vtx.z;
+	fZEnd = pEnd->v3Vtx.z;
+
+	long lBackIndex;
+
+	do
+	{
+		x = line.GetCurrentX();
+		y = line.GetCurrentY();
+
+		fRate = line.GetCurrentRate();
+		if (line.isLeft())
+			fRate = 1.f - fRate;
+
+		fR = BYTE(sR * (1.f - fRate) + eR * fRate);
+		fG = BYTE(sG * (1.f - fRate) + eG * fRate);
+		fB = BYTE(sB * (1.f - fRate) + eB * fRate);
+		fA = BYTE(sA * (1.f - fRate) + eA * fRate);
+
+		lBackIndex = y * uiStride + x * 4;
+
+		pBuffer[lBackIndex + 0] = fB;
+		pBuffer[lBackIndex + 1] = fG;
+		pBuffer[lBackIndex + 2] = fR;
+		pBuffer[lBackIndex + 3] = fA;
+
+	} while (line.MoveNext());
+
+
+}
+
+
+
+
+void CVertexColorShader::DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial,const wstring strMaterialName, const RENDER_STATE state)
 {
 	if (nullptr == m_pScreenBuffer) return;
 
@@ -422,20 +622,29 @@ void CVertexColorShader::DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, c
 		{
 			pBackLock->GetStride(&uiBackStride);
 
+			const VERTEX* Tri[3];
+			Tri[0] = &pVertices[0];
+			Tri[1] = &pVertices[1];
+			Tri[2] = &pVertices[2];
+
 			if (state == RENDER_STATE::BOUNDBOX)
 			{
-				DrawTriTest(pBackData, uiBackStride, pVertices, iScreenWidth, iScreenHeight);
+				DrawLinearInterpolation(pBackData, uiBackStride, pVertices, pVertices + 1);
+				DrawLinearInterpolation(pBackData, uiBackStride, pVertices + 1, pVertices + 2);
+				DrawLinearInterpolation(pBackData, uiBackStride, pVertices + 2, pVertices);
 			}
 
 			else if (state == RENDER_STATE::TEST)
 			{
 				if (false == m_bWireframe)
 				{
-					FillTriTest(pBackData, uiBackStride, pVertices, iScreenWidth, iScreenHeight);
+					DrawTrilinearInterpolation(pBackData, uiBackStride, Tri);
 				}
 				else
 				{
-					DrawTriTest(pBackData, uiBackStride, pVertices, iScreenWidth, iScreenHeight);
+					DrawLinearInterpolation(pBackData, uiBackStride, pVertices, pVertices + 1);
+					DrawLinearInterpolation(pBackData, uiBackStride, pVertices + 1, pVertices + 2);
+					DrawLinearInterpolation(pBackData, uiBackStride, pVertices + 2, pVertices);
 				}
 			}
 				
@@ -443,11 +652,13 @@ void CVertexColorShader::DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, c
 			{
 				if (false == m_bWireframe)
 				{
-					FillTriSmooth(pBackData, uiBackStride, pVertices, iScreenWidth, iScreenHeight);
+					FillTrilinearInterpolation(pBackData, uiBackStride, Tri);
 				}
 				else
 				{
-					DrawTriSmooth(pBackData, uiBackStride, pVertices, iScreenWidth, iScreenHeight);
+					FillLinearInterpolation(pBackData, uiBackStride, pVertices, pVertices + 1);
+					FillLinearInterpolation(pBackData, uiBackStride, pVertices+1, pVertices + 2);
+					FillLinearInterpolation(pBackData, uiBackStride, pVertices+2, pVertices);
 				}
 			}
 				
@@ -457,7 +668,7 @@ void CVertexColorShader::DrawTriangle(VERTEX* pVertices, CMaterial* pMaterial, c
 	}
 }
 
-void CVertexColorShader::DrawQuad(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const int iScreenWidth, const int iScreenHeight, const RENDER_STATE state)
+void CVertexColorShader::DrawQuad(VERTEX* pVertices, CMaterial* pMaterial, const wstring strMaterialName, const RENDER_STATE state)
 {
 	if (nullptr == m_pScreenBuffer) return;
 
@@ -511,43 +722,44 @@ void CVertexColorShader::DrawQuad(VERTEX* pVertices, CMaterial* pMaterial, const
 		{
 			pBackLock->GetStride(&uiBackStride);
 
-			VERTEX* SortedCross[4];
-			for (int i = 0; i < 4; ++i)
-				SortedCross[i] = pVertices + i;
-
-			if (state == RENDER_STATE::FLAT)
-			{
-				XMFLOAT4 v4Col;
-				v4Col.x = (SortedCross[0]->v4Color.x + SortedCross[1]->v4Color.x + SortedCross[2]->v4Color.x + SortedCross[3]->v4Color.x) / 4.f;
-				v4Col.y = (SortedCross[0]->v4Color.y + SortedCross[1]->v4Color.y + SortedCross[2]->v4Color.y + SortedCross[3]->v4Color.y) / 4.f;
-				v4Col.z = (SortedCross[0]->v4Color.z + SortedCross[1]->v4Color.z + SortedCross[2]->v4Color.z + SortedCross[3]->v4Color.z) / 4.f;
-
-				for (int i = 0; i < 4; ++i)
-					SortedCross[i]->v4Color = v4Col;
-			}
-
-			VERTEX TriA[3], TriB[3];
-			TriA[0] = *SortedCross[0];
-			TriA[1] = *SortedCross[1];
-			TriA[2] = *SortedCross[3];
+			const VERTEX *TriA[3], *TriB[3];
+			TriA[0] = &pVertices[0];
+			TriA[1] = &pVertices[1];
+			TriA[2] = &pVertices[3];
 
 		
 
-			TriB[0] = *SortedCross[1];
-			TriB[1] = *SortedCross[2];
-			TriB[2] = *SortedCross[3];
+			TriB[0] = &pVertices[1];
+			TriB[1] = &pVertices[2];
+			TriB[2] = &pVertices[3];
 
-			if (state == RENDER_STATE::TEST)
+			if (state == RENDER_STATE::BOUNDBOX)
+			{
+				DrawLinearInterpolation(pBackData, uiBackStride, TriA[0], TriA[1]);
+				DrawLinearInterpolation(pBackData, uiBackStride, TriA[1], TriA[2]);
+				DrawLinearInterpolation(pBackData, uiBackStride, TriA[2], TriA[0]);
+
+				DrawLinearInterpolation(pBackData, uiBackStride, TriB[0], TriB[1]);
+				DrawLinearInterpolation(pBackData, uiBackStride, TriB[1], TriB[2]);
+				DrawLinearInterpolation(pBackData, uiBackStride, TriB[2], TriB[0]);
+			}
+			else if (state == RENDER_STATE::TEST)
 			{
 				if (false == m_bWireframe)
 				{
-					FillTriTest(pBackData, uiBackStride, TriA, iScreenWidth, iScreenHeight);
-					FillTriTest(pBackData, uiBackStride, TriB, iScreenWidth, iScreenHeight);
+					DrawTrilinearInterpolation(pBackData, uiBackStride, TriA);
+					DrawTrilinearInterpolation(pBackData, uiBackStride, TriB);
 				}
 				else
 				{
-					DrawTriTest(pBackData, uiBackStride, TriA, iScreenWidth, iScreenHeight);
-					DrawTriTest(pBackData, uiBackStride, TriB, iScreenWidth, iScreenHeight);
+
+					DrawLinearInterpolation(pBackData, uiBackStride, TriA[0], TriA[1]);
+					DrawLinearInterpolation(pBackData, uiBackStride, TriA[1], TriA[2]);
+					DrawLinearInterpolation(pBackData, uiBackStride, TriA[2], TriA[0]);
+
+					DrawLinearInterpolation(pBackData, uiBackStride, TriB[0], TriB[1]);
+					DrawLinearInterpolation(pBackData, uiBackStride, TriB[1], TriB[2]);
+					DrawLinearInterpolation(pBackData, uiBackStride, TriB[2], TriB[0]);
 				}
 				
 			}
@@ -555,13 +767,19 @@ void CVertexColorShader::DrawQuad(VERTEX* pVertices, CMaterial* pMaterial, const
 			{
 				if (false == m_bWireframe)
 				{
-					FillTriSmooth(pBackData, uiBackStride, TriA, iScreenWidth, iScreenHeight);
-					FillTriSmooth(pBackData, uiBackStride, TriB, iScreenWidth, iScreenHeight);
+					FillTrilinearInterpolation(pBackData, uiBackStride, TriA);
+					FillTrilinearInterpolation(pBackData, uiBackStride, TriB);
 				}
 				else
 				{
-					DrawTriSmooth(pBackData, uiBackStride, TriA, iScreenWidth, iScreenHeight);
-					DrawTriSmooth(pBackData, uiBackStride, TriB, iScreenWidth, iScreenHeight);
+					FillLinearInterpolation(pBackData, uiBackStride, TriA[0], TriA[1]);
+					FillLinearInterpolation(pBackData, uiBackStride, TriA[1], TriA[2]);
+					FillLinearInterpolation(pBackData, uiBackStride, TriA[2], TriA[0]);
+
+					FillLinearInterpolation(pBackData, uiBackStride, TriB[0], TriB[1]);
+					FillLinearInterpolation(pBackData, uiBackStride, TriB[1], TriB[2]);
+					FillLinearInterpolation(pBackData, uiBackStride, TriB[2], TriB[0]);
+
 				}
 				
 			}
@@ -571,3 +789,4 @@ void CVertexColorShader::DrawQuad(VERTEX* pVertices, CMaterial* pMaterial, const
 		pBackLock->Release();
 	}
 }
+
