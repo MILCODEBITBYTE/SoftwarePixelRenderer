@@ -7,11 +7,11 @@ Tutorial을 컴파일하고 테스트하기 위한 시스템 최소사양은 아
 
 ------------------------------------- 아 래 ----------------------------------------
 
-    ○ OS                : Windows 7 이상
+    ○ OS                : Windows 8 이상
     ○ Compiler & IDE    : VisualStudio 2015 이상 
     ○ CPU               : 논리 2 core 이상
     ○ RAM               : 256MB 이상
-    ○ VGA               : Intel iGPU 또는 Amd VegaX 또는 외장 VGA
+    ○ VGA               : DirectX 10 이상을 지원하는 Intel iGPU 또는 Amd VegaX 또는 외장 VGA
 
 
 
